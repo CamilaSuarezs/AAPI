@@ -1,11 +1,11 @@
-# [NOMBRE DEL PROYECTO] - Proyecto Integrador
+# AAPI - Proyecto Integrador
 > [Breve descripción de una frase: qué hace el proyecto y qué problema resuelve]
 
 ## 🎓 Información Académica
-* **Institución:** [Nombre de la Institución]
-* **Programa:** Tecnología en Desarrollo de Software
-* **Semestre:** [Número de Semestre]
-* **Asignatura:** [Nombre de la Materia]
+* **Institución:** Universidad de San Buenaventura
+* **Programa:** Tecnología en Automatización Industrial
+* **Semestre:** Primer Semestre
+* **Asignatura:** Fundamentos de la Era Digital
 
 ---
 
@@ -13,6 +13,8 @@
 | Nombre Completo | Rol en el Proyecto | Usuario GitLab |
 | :--- | :--- | :--- |
 | Estudiante 1 | Líder / Backend | @usuario1 |
+| Estudiante 2 | Frontend / UX | @usuario2 |
+| Estudiante 2 | Frontend / UX | @usuario2 |
 | Estudiante 2 | Frontend / UX | @usuario2 |
 
 ---
