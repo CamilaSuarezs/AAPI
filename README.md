@@ -12,7 +12,7 @@
 ## 👥 Integrantes
 | Nombre Completo | Rol en el Proyecto | Usuario GitLab |
 | :--- | :--- | :--- |
-| SAMUEL BOHÓRQUEZ RODRÍGUEZ | Automatización & Lógica | @usuario1 |
+| SAMUEL BOHÓRQUEZ RODRÍGUEZ | Automatización & Lógica | @SamWiillss|
 | ZARETH VALENTINA MAHECHA MAHECHA | Líder de Proyecto | @usuario2 |
 | MARIA NELLY MENA BUELVAS | Diseño & Front-End | @usuario2 |
 | YULIETH CAMILA SUÁREZ SÁNCHEZ | Investigación & Análisis | @CamilaSuarezs |
