@@ -23,11 +23,11 @@
 Explica el contexto del problema, la solución desarrollada y el alcance técnico de la entrega.
 
 ### 🎯 Objetivos
-1. **General:** [Objetivo principal del sistema]
+1. **General:** Crear una herramienta de automatización y análisis de procesos industriales para las plantas del sector alimentario que identifiquen y reduzcan pérdidas productivas.   
 2. **Específicos:**
-   * Desarrollar el módulo...
-   * Implementar...
-
+   *  Analizar las variables operativas del proceso industrial alimentario mediante la recopilación y procesamiento de datos asociados a temperatura, tiempos de operación y desempeño de maquinaria, con el fin de determinar su incidencia en la eficiencia productiva.
+   * Definir los requerimientos funcionales y técnicos del sistema AAPI mediante el establecimiento de criterios de monitoreo, registro y visualización de información operativa en plantas del sector alimentario.
+   * Evaluar el desempeño del sistema AAPI mediante pruebas funcionales y el análisis de indicadores operativos que permitan verificar mejoras en el control y seguimiento de los procesos productivos.  
 ---
 
 ## 🛠️ Stack Tecnológico
