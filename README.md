@@ -31,7 +31,7 @@ Explica el contexto del problema, la solución desarrollada y el alcance técnic
 ---
 
 ## 🛠️ Stack Tecnológico
-* **Lenguajes:** Python, JavaScript, etc.
+* **Lenguajes:** Html, CSS y Javascript
 * **Bases de Datos:** PostgreSQL, SQLite, etc.
 * **Herramientas:** Git, GitLab CI/CD.
 
