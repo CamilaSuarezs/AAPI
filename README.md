@@ -12,7 +12,7 @@
 ## 👥 Integrantes
 | Nombre Completo | Rol en el Proyecto | Usuario GitLab |
 | :--- | :--- | :--- |
-| Samuel Bohórquez Rodríguez | Líder / Backend | @usuario1 |
+| SAMUEL BOHÓRQUEZ RODRÍGUEZ | Líder / Backend | @usuario1 |
 | ZARETH VALENTINA MAHECHA MAHECHA | Frontend / UX | @usuario2 |
 | MARIA NELLY MENA BUELVAS | Frontend / UX | @usuario2 |
 | YULIETH CAMILA SUÁREZ SÁNCHEZ | Frontend / UX | @usuario2 |
