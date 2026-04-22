@@ -15,7 +15,7 @@
 | SAMUEL BOHÓRQUEZ RODRÍGUEZ | Automatización & Lógica | @usuario1 |
 | ZARETH VALENTINA MAHECHA MAHECHA | Líder de Proyecto | @usuario2 |
 | MARIA NELLY MENA BUELVAS | Diseño & Front-End | @usuario2 |
-| YULIETH CAMILA SUÁREZ SÁNCHEZ | Investigación & Análisis | @uCamilaSuarezs |
+| YULIETH CAMILA SUÁREZ SÁNCHEZ | Investigación & Análisis | @CamilaSuarezs |
 
 ---
 
