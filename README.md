@@ -1,5 +1,5 @@
 # AAPI - Proyecto Integrador
-> [Breve descripción de una frase: qué hace el proyecto y qué problema resuelve]
+> AAPI, es un sistema de automatización diseñado para plantas del sector alimentario. Consiste en un dashboard interactivo desarrollado con tecnologías web (HTML, CSS y JavaScript) que permite registrar y analizar variables operativas (como temperatura y tiempos de ciclo) mediante un sistema de semáforos, ayudando al personal a identificar fallas, reducir pérdidas de producto y mejorar la eficiencia sin requerir licencias costosas.
 
 ## 🎓 Información Académica
 * **Institución:** Universidad de San Buenaventura
