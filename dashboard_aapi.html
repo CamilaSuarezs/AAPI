@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AAPI - Dashboard de Monitoreo Industrial</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --bg-dark: #0f172a;
+      --card-bg: #1e293b;
+      --card-border: #334155;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --primary: #38bdf8;
+      --success: #22c55e;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      background: #111827;
+      border-bottom: 1px solid var(--card-border);
+      padding: 1rem 1.5rem;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+    }
+    .brand h1 { font-size: 1.25rem; font-weight: 700; }
+    .brand p { font-size: 0.8rem; color: var(--text-muted); }
+    .header-actions { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; }
+    .status-badge {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      padding: 0.35rem 0.8rem; border-radius: 9999px; font-size: 0.8rem; font-weight: 600;
+      background: rgba(56, 189, 248, 0.15); color: var(--primary); border: 1px solid rgba(56, 189, 248, 0.3);
+    }
+    .status-badge.connected {
+      background: rgba(34, 197, 94, 0.15); color: var(--success); border-color: rgba(34, 197, 94, 0.3);
+    }
+    .btn {
+      background: var(--card-bg); color: var(--text-main); border: 1px solid var(--card-border);
+      padding: 0.5rem 0.9rem; border-radius: 8px; font-size: 0.85rem; font-weight: 500; cursor: pointer;
+    }
+    .btn-primary { background: #0284c7; border-color: #38bdf8; color: white; }
+    .btn-success { background: rgba(34, 197, 94, 0.2); border-color: var(--success); color: #86efac; }
+    main {
+      flex: 1; padding: 1.5rem; max-width: 1500px; width: 100%; margin: 0 auto;
+      display: flex; flex-direction: column; gap: 1.5rem;
+    }
+    .grid-kpis {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.25rem;
+    }
+    .card {
+      background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px;
+      padding: 1.25rem; position: relative; overflow: hidden;
+    }
+    .card-kpi::before {
+      content: ""; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--primary);
+    }
+    .card-kpi.success::before { background: var(--success); }
+    .card-kpi.warning::before { background: var(--warning); }
+    .card-kpi.danger::before { background: var(--danger); }
+    .kpi-title { font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; }
+    .kpi-value { font-size: 2.2rem; font-weight: 700; margin: 0.4rem 0; font-variant-numeric: tabular-nums; }
+    .kpi-unit { font-size: 0.9rem; color: var(--text-muted); }
+    .kpi-footer {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-top: 0.75rem; font-size: 0.75rem; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 0.5rem;
+    }
+    .kpi-badge { padding: 0.2rem 0.5rem; border-radius: 4px; font-weight: 600; font-size: 0.7rem; }
+    .badge-ok { background: rgba(34, 197, 94, 0.2); color: #86efac; }
+    .badge-warn { background: rgba(245, 158, 11, 0.2); color: #fde047; }
+    .badge-alarm { background: rgba(239, 68, 68, 0.2); color: #fca5a5; }
+    .log-box {
+      background: #090d16; border: 1px solid var(--card-border); border-radius: 8px;
+      padding: 0.75rem; height: 150px; overflow-y: auto; font-family: monospace; font-size: 0.8rem; color: #38bdf8;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <h1>AAPI | Dashboard de Monitoreo Industrial</h1>
+      <p>Temperatura, Humedad, Tiempo de Ciclo y Velocidad - Conexión Arduino / Amplificadores</p>
+    </div>
+    <div class="header-actions">
+      <div id="statusBadge" class="status-badge">
+        <span id="statusText">Modo: Simulación Local</span>
+      </div>
+      <button id="btnSerialConnect" class="btn btn-primary" onclick="toggleSerialConnection()">
+        🔌 Conectar Arduino / COM
+      </button>
+      <button id="btnToggleSim" class="btn btn-success" onclick="toggleSimulation()">
+        ⏸ Pausar Simulación
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <section class="grid-kpis">
+      <div id="card-temp" class="card card-kpi">
+        <div class="kpi-title">🌡️ Temperatura</div>
+        <div><span id="val-temp" class="kpi-value">72.0</span> <span class="kpi-unit">°C</span></div>
+        <div class="kpi-footer">
+          <span>Rango óptimo: 65 - 78 °C</span>
+          <span id="badge-temp" class="kpi-badge badge-ok">NORMAL</span>
+        </div>
+      </div>
+
+      <div id="card-hum" class="card card-kpi">
+        <div class="kpi-title">💧 Humedad Relativa</div>
+        <div><span id="val-hum" class="kpi-value">55.0</span> <span class="kpi-unit">%</span></div>
+        <div class="kpi-footer">
+          <span>Rango óptimo: 40 - 65 %</span>
+          <span id="badge-hum" class="kpi-badge badge-ok">NORMAL</span>
+        </div>
+      </div>
+
+      <div id="card-ciclo" class="card card-kpi">
+        <div class="kpi-title">⏱️ Tiempo de Ciclo</div>
+        <div><span id="val-ciclo" class="kpi-value">25.0</span> <span class="kpi-unit">s</span></div>
+        <div class="kpi-footer">
+          <span>Rango óptimo: 15 - 35 s</span>
+          <span id="badge-ciclo" class="kpi-badge badge-ok">NORMAL</span>
+        </div>
+      </div>
+
+      <div id="card-vel" class="card card-kpi">
+        <div class="kpi-title">⚡ Velocidad de Línea</div>
+        <div><span id="val-vel" class="kpi-value">60.0</span> <span class="kpi-unit">m/min</span></div>
+        <div class="kpi-footer">
+          <span>Rango óptimo: 40 - 85 m/min</span>
+          <span id="badge-vel" class="kpi-badge badge-ok">NORMAL</span>
+        </div>
+      </div>
+    </section>
+
+    <div class="card">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <h3>📈 Telemetría Dinámica de Variables (Nivel, Desnivel y Aumento)</h3>
+        <div style="display: flex; gap: 0.75rem; font-size: 0.85rem;">
+          <label><input type="checkbox" checked onchange="toggleDataset(0, this.checked)"> Temp (°C)</label>
+          <label><input type="checkbox" checked onchange="toggleDataset(1, this.checked)"> Humedad (%)</label>
+          <label><input type="checkbox" checked onchange="toggleDataset(2, this.checked)"> Ciclo (s)</label>
+          <label><input type="checkbox" checked onchange="toggleDataset(3, this.checked)"> Velocidad (m/min)</label>
+        </div>
+      </div>
+      <div style="height: 360px; position: relative;">
+        <canvas id="telemetryChart"></canvas>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3 style="margin-bottom: 0.75rem;">🚨 Registro Serial y Eventos</h3>
+      <div id="eventLogBox" class="log-box">
+        <div>[SISTEMA] Dashboard AAPI listo. Conecta tu Arduino o usa la simulación local.</div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    let telemetryChart = null;
+    let simTimer = null;
+    let isSimRunning = true;
+    let serialPort = null;
+    let serialReader = null;
+    const MAX_POINTS = 35;
+
+    function initChart() {
+      const ctx = document.getElementById('telemetryChart').getContext('2d');
+      telemetryChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: [],
+          datasets: [
+            { label: 'Temperatura (°C)', borderColor: '#ef4444', backgroundColor: 'rgba(239,68,68,0.1)', borderWidth: 2, data: [], tension: 0.3 },
+            { label: 'Humedad (%)', borderColor: '#38bdf8', backgroundColor: 'rgba(56,189,248,0.1)', borderWidth: 2, data: [], tension: 0.3 },
+            { label: 'Tiempo de Ciclo (s)', borderColor: '#f59e0b', backgroundColor: 'rgba(245,158,11,0.1)', borderWidth: 2, data: [], tension: 0.3 },
+            { label: 'Velocidad (m/min)', borderColor: '#22c55e', backgroundColor: 'rgba(34,197,94,0.1)', borderWidth: 2, data: [], tension: 0.3 }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          animation: { duration: 150 },
+          scales: {
+            x: { grid: { color: 'rgba(255,255,255,0.06)' }, ticks: { color: '#94a3b8', font: { size: 10 } } },
+            y: { grid: { color: 'rgba(255,255,255,0.06)' }, ticks: { color: '#94a3b8' }, min: 0, max: 120 }
+          },
+          plugins: { legend: { labels: { color: '#f8fafc' } } }
+        }
+      });
+    }
+
+    function toggleDataset(idx, visible) {
+      if (telemetryChart) {
+        telemetryChart.setDatasetVisibility(idx, visible);
+        telemetryChart.update();
+      }
+    }
+
+    function updateDashboard(temp, hum, ciclo, vel) {
+      document.getElementById('val-temp').innerText = temp.toFixed(1);
+      document.getElementById('val-hum').innerText = hum.toFixed(1);
+      document.getElementById('val-ciclo').innerText = ciclo.toFixed(1);
+      document.getElementById('val-vel').innerText = vel.toFixed(1);
+
+      evaluateCard('card-temp', 'badge-temp', temp, 65, 78);
+      evaluateCard('card-hum', 'badge-hum', hum, 40, 65);
+      evaluateCard('card-ciclo', 'badge-ciclo', ciclo, 15, 35);
+      evaluateCard('card-vel', 'badge-vel', vel, 40, 85);
+
+      const now = new Date().toLocaleTimeString();
+      telemetryChart.data.labels.push(now);
+      telemetryChart.data.datasets[0].data.push(temp);
+      telemetryChart.data.datasets[1].data.push(hum);
+      telemetryChart.data.datasets[2].data.push(ciclo);
+      telemetryChart.data.datasets[3].data.push(vel);
+
+      if (telemetryChart.data.labels.length > MAX_POINTS) {
+        telemetryChart.data.labels.shift();
+        telemetryChart.data.datasets.forEach(ds => ds.data.shift());
+      }
+      telemetryChart.update('none');
+    }
+
+    function evaluateCard(cardId, badgeId, val, minOk, maxOk) {
+      const card = document.getElementById(cardId);
+      const badge = document.getElementById(badgeId);
+      card.classList.remove('success', 'warning', 'danger');
+      badge.classList.remove('badge-ok', 'badge-warn', 'badge-alarm');
+
+      if (val < minOk * 0.85 || val > maxOk * 1.15) {
+        card.classList.add('danger'); badge.classList.add('badge-alarm'); badge.innerText = 'CRÍTICO';
+      } else if (val < minOk || val > maxOk) {
+        card.classList.add('warning'); badge.classList.add('badge-warn'); badge.innerText = 'PRECAUCIÓN';
+      } else {
+        card.classList.add('success'); badge.classList.add('badge-ok'); badge.innerText = 'NORMAL';
+      }
+    }
+
+    function generateSimData() {
+      const t = Date.now() / 1000;
+      const temp = 72 + Math.sin(t * 0.5) * 4 + (Math.random() - 0.5) * 1.5;
+      const hum = 52 + Math.cos(t * 0.4) * 6 + (Math.random() - 0.5) * 2;
+      const ciclo = 24 + Math.sin(t * 0.3) * 3 + (Math.random() - 0.5) * 1;
+      const vel = 62 + Math.cos(t * 0.6) * 8 + (Math.random() - 0.5) * 2;
+      updateDashboard(temp, hum, ciclo, vel);
+    }
+
+    function startSim() {
+      if (simTimer) clearInterval(simTimer);
+      simTimer = setInterval(generateSimData, 600);
+      isSimRunning = true;
+      document.getElementById('btnToggleSim').innerText = '⏸ Pausar Simulación';
+    }
+
+    function pauseSim() {
+      if (simTimer) clearInterval(simTimer);
+      isSimRunning = false;
+      document.getElementById('btnToggleSim').innerText = '▶ Reanudar Simulación';
+    }
+
+    function toggleSimulation() {
+      if (isSimRunning) pauseSim(); else startSim();
+    }
+
+    async function toggleSerialConnection() {
+      if (!("serial" in navigator)) {
+        alert("Usa Chrome, Edge u Opera para conectar el Arduino por Web Serial API.");
+        return;
+      }
+      if (serialPort) {
+        if (serialReader) await serialReader.cancel();
+        await serialPort.close();
+        serialPort = null;
+        document.getElementById('statusBadge').className = 'status-badge';
+        document.getElementById('statusText').innerText = 'Modo: Simulación Local';
+        document.getElementById('btnSerialConnect').innerText = '🔌 Conectar Arduino / COM';
+        startSim();
+        return;
+      }
+      try {
+        serialPort = await navigator.serial.requestPort();
+        await serialPort.open({ baudRate: 9600 });
+        pauseSim();
+        document.getElementById('statusBadge').className = 'status-badge connected';
+        document.getElementById('statusText').innerText = 'Arduino Conectado (9600 bps)';
+        document.getElementById('btnSerialConnect').innerText = '❌ Desconectar Arduino';
+        logMsg("[SERIAL] Conectado a Arduino. Leyendo TEMP,HUM,CICLO,VEL...");
+        readSerialLoop();
+      } catch (err) {
+        logMsg("[ERROR] " + err.message);
+      }
+    }
+
+    async function readSerialLoop() {
+      const decoder = new TextDecoderStream();
+      serialPort.readable.pipeTo(decoder.writable);
+      serialReader = decoder.readable.getReader();
+      let buffer = "";
+      try {
+        while (true) {
+          const { value, done } = await serialReader.read();
+          if (done) break;
+          buffer += value;
+          const lines = buffer.split('\n');
+          buffer = lines.pop();
+          for (const line of lines) {
+            const parts = line.trim().split(',').map(Number);
+            if (parts.length >= 4 && parts.every(n => !isNaN(n))) {
+              updateDashboard(parts[0], parts[1], parts[2], parts[3]);
+              logMsg("RX: " + line.trim());
+            }
+          }
+        }
+      } catch (e) {
+        logMsg("[SERIAL] Lectura detenida.");
+      }
+    }
+
+    function logMsg(msg) {
+      const box = document.getElementById('eventLogBox');
+      const div = document.createElement('div');
+      div.innerText = `${new Date().toLocaleTimeString()} ${msg}`;
+      box.prepend(div);
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      initChart();
+      startSim();
+    });
+  </script>
+</body>
+</html>
